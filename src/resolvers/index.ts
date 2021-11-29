@@ -1,9 +1,13 @@
-const {Query} = require('./query');
+import {Note} from "./note";
 import {Mutation} from "./mutation";
 import {GraphQLDateTime} from 'graphql-iso-date'
+import {User} from "./user";
+import {Query} from "./query";
 
 module.exports = {
     Query,
     Mutation,
-    DateTime:GraphQLDateTime
+    DateTime:GraphQLDateTime,
+    Note,
+    User
 }
