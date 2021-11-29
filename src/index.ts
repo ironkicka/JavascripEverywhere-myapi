@@ -12,7 +12,10 @@ import { loadSchemaSync } from '@graphql-tools/load'
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
 import { addResolversToSchema } from '@graphql-tools/schema'
 import {join} from 'path'
-const typeDefs = loadSchemaSync(join(__dirname, 'schema.gql'), { loaders: [new GraphQLFileLoader()] })
+
+let filePath = !__dirname.includes('build')?join(__dirname, 'schema.gql'):join(__dirname,'../src', 'schema.gql')
+
+const typeDefs = loadSchemaSync(filePath, { loaders: [new GraphQLFileLoader()] })
 
 const resolvers:Resolvers = {
     Query:{
