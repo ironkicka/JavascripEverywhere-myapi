@@ -1,5 +1,4 @@
-import {MutationResolvers, QueryResolvers, Resolver, Resolvers, ResolversTypes} from "./generated/graphql";
-const {ApolloServer, gql} = require('apollo-server-express')
+const {ApolloServer} = require('apollo-server-express')
 import express from 'express'
 require('dotenv').config();
 const db = require('./db');
@@ -17,38 +16,30 @@ let filePath = !__dirname.includes('build')?join(__dirname, 'schema.gql'):join(_
 
 const typeDefs = loadSchemaSync(filePath, { loaders: [new GraphQLFileLoader()] })
 
-const resolvers:Resolvers = {
-    Query:{
-        notes:async()=>{
-            return models.Note.find();
-        },
-        note:async(parent,args)=>{
-            return models.Note.findById(args.id)
-        }
-    },
-    Mutation:{
-        newNote:async(parent,args)=>{
-            return await models.Note.create({
-                content:args.content,
-                author:'Adam Scott'
-            })
-        }
-    }
-}
+const resolvers = require('./resolvers')
 
 const schema = addResolversToSchema({
     schema: typeDefs,
     resolvers: resolvers
 });
 
-const server = new ApolloServer({schema})
+(async () => {
+    const server = new ApolloServer({
+        schema,
+        context: async () => ({
+            models
+        })
+    })
+    await server.start()
 
-server.applyMiddleware({app,path:'/api'});
+    server.applyMiddleware({app, path: '/api'});
 
-app.get('/', (req, res) => {
-    res.send('Hello World!!!')
-})
+    app.get('/', (req, res) => {
+        res.send('Hello World!!!')
+    })
 
-app.listen(port, () => {
-    console.log(`GraphQL Sever running at http://localhost:${port}${server.graphqlPath}`)
-})
+    app.listen(port, () => {
+        console.log(`GraphQL Sever running at http://localhost:${port}${server.graphqlPath}`)
+    })
+
+})()
