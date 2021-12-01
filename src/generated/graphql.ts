@@ -19,6 +19,7 @@ export type Query = {
   __typename?: 'Query';
   me: User;
   note: Note;
+  noteFeed?: Maybe<NoteFeed>;
   notes: Array<Note>;
   user?: Maybe<User>;
   users: Array<User>;
@@ -27,6 +28,11 @@ export type Query = {
 
 export type QueryNoteArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryNoteFeedArgs = {
+  cursor?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -53,6 +59,13 @@ export type Note = {
   favoritedBy?: Maybe<Array<User>>;
   id: Scalars['ID'];
   updatedAt: Scalars['DateTime'];
+};
+
+export type NoteFeed = {
+  __typename?: 'NoteFeed';
+  cursor: Scalars['String'];
+  hasNextPage: Scalars['Boolean'];
+  notes: Array<Maybe<Note>>;
 };
 
 export type Mutation = {
@@ -181,8 +194,9 @@ export type ResolversTypes = {
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
-  Mutation: ResolverTypeWrapper<{}>;
+  NoteFeed: ResolverTypeWrapper<NoteFeed>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  Mutation: ResolverTypeWrapper<{}>;
   AdditionalEntityFields: AdditionalEntityFields;
 };
 
@@ -195,8 +209,9 @@ export type ResolversParentTypes = {
   DateTime: Scalars['DateTime'];
   Int: Scalars['Int'];
   ID: Scalars['ID'];
-  Mutation: {};
+  NoteFeed: NoteFeed;
   Boolean: Scalars['Boolean'];
+  Mutation: {};
   AdditionalEntityFields: AdditionalEntityFields;
 };
 
@@ -250,6 +265,7 @@ export type MapDirectiveResolver<Result, Parent, ContextType = any, Args = MapDi
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   me?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   note?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<QueryNoteArgs, 'id'>>;
+  noteFeed?: Resolver<Maybe<ResolversTypes['NoteFeed']>, ParentType, ContextType, RequireFields<QueryNoteFeedArgs, never>>;
   notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'username'>>;
   users?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
@@ -280,6 +296,13 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
   name: 'DateTime';
 }
 
+export type NoteFeedResolvers<ContextType = any, ParentType extends ResolversParentTypes['NoteFeed'] = ResolversParentTypes['NoteFeed']> = {
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  notes?: Resolver<Array<Maybe<ResolversTypes['Note']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   deleteNote?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, 'id'>>;
   newNote?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationNewNoteArgs, 'content'>>;
@@ -294,6 +317,7 @@ export type Resolvers<ContextType = any> = {
   User?: UserResolvers<ContextType>;
   Note?: NoteResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
+  NoteFeed?: NoteFeedResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
 };
 

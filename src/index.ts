@@ -3,13 +3,19 @@ import express from 'express'
 import { loadSchemaSync } from '@graphql-tools/load'
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
 import { addResolversToSchema } from '@graphql-tools/schema'
+import depthLimit from 'graphql-depth-limit';
 import {join} from 'path'
 require('dotenv').config();
+import {createComplexityLimitRule} from 'graphql-validation-complexity'
 const db = require('./db');
 const models = require('./models')
+import helmet from 'helmet';
+import cors from 'cors';
 const DB_HOST = process.env.DB_HOST
 db.connect(DB_HOST)
 const app = express();
+app.use(helmet());
+app.use(cors());
 const port = process.env.PORT || 4000;
 import jwt from 'jsonwebtoken'
 
@@ -38,6 +44,7 @@ const getUser = (token:string)=>{
 (async () => {
     const server = new ApolloServer({
         schema,
+        validationRules:[depthLimit(5),createComplexityLimitRule(1000)],
         context: async ({req}:any) => {
             const token = req.headers.authorization;
             const user = getUser(token);
