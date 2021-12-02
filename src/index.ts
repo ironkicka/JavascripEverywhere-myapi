@@ -17,6 +17,10 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 const port = process.env.PORT || 4000;
+import { loadSchemaSync } from '@graphql-tools/load'
+import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
+import { addResolversToSchema } from '@graphql-tools/schema'
+import {join} from 'path'
 import jwt from 'jsonwebtoken'
 
 let filePath = !__dirname.includes('build')?join(__dirname, 'schema.gql'):join(__dirname,'../src', 'schema.gql')
