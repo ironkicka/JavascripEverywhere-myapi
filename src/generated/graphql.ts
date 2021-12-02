@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo } from 'graphql';
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -12,12 +12,17 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  DateTime: any;
 };
 
 export type Query = {
   __typename?: 'Query';
+  me: User;
   note: Note;
+  noteFeed?: Maybe<NoteFeed>;
   notes: Array<Note>;
+  user?: Maybe<User>;
+  users: Array<User>;
 };
 
 
@@ -25,21 +30,87 @@ export type QueryNoteArgs = {
   id: Scalars['ID'];
 };
 
+
+export type QueryNoteFeedArgs = {
+  cursor?: InputMaybe<Scalars['String']>;
+};
+
+
+export type QueryUserArgs = {
+  username: Scalars['String'];
+};
+
+export type User = {
+  __typename?: 'User';
+  avatar: Scalars['String'];
+  email: Scalars['String'];
+  favorites: Array<Note>;
+  id: Scalars['ID'];
+  notes: Array<Note>;
+  username: Scalars['String'];
+};
+
 export type Note = {
   __typename?: 'Note';
-  author: Scalars['String'];
+  author: User;
   content: Scalars['String'];
+  createdAt: Scalars['DateTime'];
+  favoriteCount: Scalars['Int'];
+  favoritedBy?: Maybe<Array<User>>;
   id: Scalars['ID'];
+  updatedAt: Scalars['DateTime'];
+};
+
+export type NoteFeed = {
+  __typename?: 'NoteFeed';
+  cursor: Scalars['String'];
+  hasNextPage: Scalars['Boolean'];
+  notes: Array<Maybe<Note>>;
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
+  deleteNote?: Maybe<Scalars['Boolean']>;
   newNote: Note;
+  signIn: Scalars['String'];
+  signUp: Scalars['String'];
+  toggleFavorite: Note;
+  updateNote: Note;
+};
+
+
+export type MutationDeleteNoteArgs = {
+  id: Scalars['ID'];
 };
 
 
 export type MutationNewNoteArgs = {
   content: Scalars['String'];
+};
+
+
+export type MutationSignInArgs = {
+  email?: InputMaybe<Scalars['String']>;
+  password: Scalars['String'];
+  username?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationSignUpArgs = {
+  email: Scalars['String'];
+  password: Scalars['String'];
+  username: Scalars['String'];
+};
+
+
+export type MutationToggleFavoriteArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationUpdateNoteArgs = {
+  content: Scalars['String'];
+  id: Scalars['ID'];
 };
 
 export type AdditionalEntityFields = {
@@ -117,22 +188,30 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
-  ID: ResolverTypeWrapper<Scalars['ID']>;
-  Note: ResolverTypeWrapper<Note>;
+  User: ResolverTypeWrapper<User>;
   String: ResolverTypeWrapper<Scalars['String']>;
-  Mutation: ResolverTypeWrapper<{}>;
+  Note: ResolverTypeWrapper<Note>;
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
+  Int: ResolverTypeWrapper<Scalars['Int']>;
+  ID: ResolverTypeWrapper<Scalars['ID']>;
+  NoteFeed: ResolverTypeWrapper<NoteFeed>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  Mutation: ResolverTypeWrapper<{}>;
   AdditionalEntityFields: AdditionalEntityFields;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Query: {};
-  ID: Scalars['ID'];
-  Note: Note;
+  User: User;
   String: Scalars['String'];
-  Mutation: {};
+  Note: Note;
+  DateTime: Scalars['DateTime'];
+  Int: Scalars['Int'];
+  ID: Scalars['ID'];
+  NoteFeed: NoteFeed;
   Boolean: Scalars['Boolean'];
+  Mutation: {};
   AdditionalEntityFields: AdditionalEntityFields;
 };
 
@@ -184,24 +263,61 @@ export type MapDirectiveArgs = {
 export type MapDirectiveResolver<Result, Parent, ContextType = any, Args = MapDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  me?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   note?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<QueryNoteArgs, 'id'>>;
+  noteFeed?: Resolver<Maybe<ResolversTypes['NoteFeed']>, ParentType, ContextType, RequireFields<QueryNoteFeedArgs, never>>;
   notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'username'>>;
+  users?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
+};
+
+export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+  avatar?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  favorites?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type NoteResolvers<ContextType = any, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = {
-  author?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  author?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  favoriteCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  favoritedBy?: Resolver<Maybe<Array<ResolversTypes['User']>>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
+  name: 'DateTime';
+}
+
+export type NoteFeedResolvers<ContextType = any, ParentType extends ResolversParentTypes['NoteFeed'] = ResolversParentTypes['NoteFeed']> = {
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  notes?: Resolver<Array<Maybe<ResolversTypes['Note']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  deleteNote?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, 'id'>>;
   newNote?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationNewNoteArgs, 'content'>>;
+  signIn?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationSignInArgs, 'password'>>;
+  signUp?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationSignUpArgs, 'email' | 'password' | 'username'>>;
+  toggleFavorite?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationToggleFavoriteArgs, 'id'>>;
+  updateNote?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, 'content' | 'id'>>;
 };
 
 export type Resolvers<ContextType = any> = {
   Query?: QueryResolvers<ContextType>;
+  User?: UserResolvers<ContextType>;
   Note?: NoteResolvers<ContextType>;
+  DateTime?: GraphQLScalarType;
+  NoteFeed?: NoteFeedResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
 };
 
