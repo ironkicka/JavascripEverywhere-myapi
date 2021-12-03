@@ -29,7 +29,8 @@ const Query:QueryResolvers ={
             notes = notes.slice(0,-1);
         }
 
-        const newCursor = notes[notes.length - 1]._id
+        const newCursor = notes.length !==0?notes[notes.length - 1]._id:""
+
         return {
             notes,
             cursor:newCursor,
